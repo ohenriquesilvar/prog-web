@@ -1,0 +1,25 @@
+{% load bootstrap3 %}
+{% bootstrap_messages %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js">
+    </script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js">
+    </script>
+</head>
+<body style="padding-top: 60px;background-color: #f5f7f8 !important;">
+    <header>
+        {%if request.user.is_authenticated %}
+            <span>Hi {{ request.user.name | title }}</span>
+            <a href="{% url 'logout' %}">Logout</a>
+        {%else%}
+            <a href="{% url 'login' %}">Login</a>
+        {%endif%}
+    </header>
+</body>
+</html>

@@ -13,8 +13,9 @@ def register(request):
         form = RegisterForm(request.POST)
         if form.is_valid() and form.validate_fields():
             user = User()
+            user.username = form.cleaned_data['email'].split('@')[0]
             user.cpf = form.cleaned_data['cpf']
-            user.name = form.cleaned_data['name']
+            user.first_name = form.cleaned_data['name']
             user.email = form.cleaned_data['email']
             user.password = form.cleaned_data['password']
             

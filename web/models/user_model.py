@@ -1,11 +1,9 @@
 from django.db import models
 import re
+from django.contrib.auth.models import AbstractUser
 
-class User(models.Model):
+class User(AbstractUser):
     cpf = models.CharField(max_length=11)
-    name = models.CharField(max_length=50)
-    email = models.CharField(max_length=50)
-    password = models.CharField(max_length=16)
 
     def __str__(self):
-        return self.name
+        return self.username

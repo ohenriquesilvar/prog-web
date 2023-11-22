@@ -8,49 +8,55 @@ from django.http import HttpResponseRedirect
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
 
-@login_required(redirect_field_name="")
-def index(request):
-    return render(request, 'index.html') 
-
+@csrf_exempt
 def register(request):
-    if request.method == 'POST':
-        form = RegisterForm(request.POST)
-        if form.is_valid() and form.validate_fields():
+    if request.method =='POST':
+        body = json.loads(request.body)
+        cpf = body['cpf']
+        name = body['name']
+        email = body['email']
+        password = body['password']
+        password_confirmation = body['password_confirmation']
+        if password != password_confirmation:
+            return JsonResponse({'message': 'As senhas não conferem'}, status=400)
+        else:
             user = User.objects.create_user(
-                cpf=form.cleaned_data['cpf'],
-                name=form.cleaned_data['name'],
-                email=form.cleaned_data['email'],
-                password=form.cleaned_data['password']
+                cpf=cpf,
+                name=name,
+                email=email,
+                password=password
             )
-            return HttpResponseRedirect("/")
+            return JsonResponse({'message': 'Usuário criado com sucesso'}, status=201)
     else:
-        form = RegisterForm()
-    
-    return render(request, 'register.html', {'form': form, 'title': 'Cadastro', 'button' : 'Cadastrar'})    
+        return JsonResponse({'message': 'Método não permitido'}, status=405)
+
+      
+@csrf_exempt
+def login(request):
+    if request.method == 'POST':
+        print(request.body)
+        body = json.loads(request.body)
+        cpf = body['cpf']
+        password = body['password']
+        
+        user = authenticate(
+            cpf=cpf,
+            password=password
+        )
+        if (user is not None):
+            auth_login(request, user)
+            return JsonResponse({'message': 'Usuário logado com sucesso'}, status=200)
+        else:
+            return JsonResponse({'message': 'Usuário ou senha incorretos'}, status=401)
+    else:
+        return JsonResponse({'message': 'Método não permitido'}, status=405)
+
+
 
 def logout(request):
     auth_logout(request)
     return HttpResponseRedirect("/login/")
-
-def login(request):
-    if request.user.is_authenticated:
-        return HttpResponseRedirect("/")
-    
-    if request.method == 'POST':
-        form = LoginForm(request.POST)
-        if form.is_valid() and form.validate_fields():
-            user = authenticate(
-                cpf     =form.cleaned_data['cpf'],
-                password=form.cleaned_data['password']
-            )
-
-            if (user is not None):
-                auth_login(request, user)
-                return HttpResponseRedirect("/")
-            else:
-                form.add_error('password', 'Usuário ou senha incorretos')
-    else:
-        form = LoginForm()
-    
-    return render(request, 'register.html', {'form': form, 'title': 'Login', 'button': 'Entrar'})    

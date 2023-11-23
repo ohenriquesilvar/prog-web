@@ -1,7 +1,29 @@
+import axios from "axios";
+const baseUrl = "http://127.0.0.1:8000";
 export class AuthService {
+	private static COOKIE_PASS = 'd6fcc1345196f834dbcf5d8dca89cd5b27fb9cb9e454b99fdfbb25f35e64e223'
 	private static USER_KEY = 'user'
 
-	static login(user: User): void {
+	private static parseUser(user: any): User {
+		return {
+			cpf : user['cpf'],
+			name: user['name'],
+			email: user['email'],
+			password: user['password']
+		}
+	}
+
+	static async login(user: User): Promise<boolean> {
+		const res = await axios.post(`${baseUrl}/login`, JSON.stringify(user))
+		console.log(res.data['user'])
+		if (res.data.status === 'error') {
+			return false
+		}
+		this.setUser(AuthService.parseUser(res.data['user']))
+		return true
+	}
+
+	static setUser(user: User): void {
 		localStorage.setItem(AuthService.USER_KEY, JSON.stringify(user))
 	}
 
@@ -21,6 +43,8 @@ export class AuthService {
 }
 
 interface User {
-	name: string
-	email: string
+	cpf: string
+	name?: string
+	email?: string
+	password?: string
 }

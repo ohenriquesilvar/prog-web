@@ -1,8 +1,5 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from django.shortcuts import render
-from .forms.form_register import RegisterForm
-from .forms.form_login import LoginForm
 from .models.user_model import User
 from django.http import HttpResponseRedirect
 from django.contrib.auth import authenticate
@@ -42,14 +39,16 @@ def login(request):
         body = json.loads(request.body)
         cpf = body['cpf']
         password = body['password']
-        
+        print(cpf)
+        print(password)
         user = authenticate(
             cpf=cpf,
             password=password
         )
         if (user is not None):
             auth_login(request, user)
-            return JsonResponse({'message': 'Usuário logado com sucesso'}, status=200)
+            user = User.objects.get(cpf=cpf)
+            return JsonResponse({'message': 'Usuário logado com sucesso', 'user' : user.to_json()}, status=200)
         else:
             return JsonResponse({'message': 'Usuário ou senha incorretos'}, status=401)
     else:

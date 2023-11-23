@@ -14,19 +14,27 @@ import { createTheme, ThemeProvider } from '@mui/material/styles'
 import { AuthService } from '@/services/AuthService'
 
 export default function SignIn() {
-	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+	const  handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault()
 		const data = new FormData(event.currentTarget)
 		console.log({
-			email: data.get('email'),
+			cpf: data.get('cpf'),
 			password: data.get('password'),
 		})
 
 		AuthService.login({
-			email: data.get('email') as string,
-			name: 'Teste',
+			cpf: data.get('cpf') as string,
+			name: '',
+			email: '',
+			password: data.get('password') as string,
+		}).then((res) => {
+			if (res) {
+				window.location.href = '/'
+			}
+		}).catch((err) => {
+			console.log('err:')
+			console.log(err)
 		})
-		window.location.href = '/'
 	}
 
 	const theme = createTheme({
@@ -66,10 +74,10 @@ export default function SignIn() {
 							margin='normal'
 							required
 							fullWidth
-							id='email'
-							label='Email'
-							name='email'
-							autoComplete='email'
+							id='cpf'
+							label='CPF'
+							name='cpf'
+							autoComplete='cpf'
 							autoFocus
 						/>
 						<TextField

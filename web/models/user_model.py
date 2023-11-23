@@ -19,5 +19,13 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     objects = CustomUserManager()
 
+    def to_json(self):
+        return {
+            'cpf': self.cpf,
+            'name': self.name,
+            'email': self.email,
+            'password': '**********'
+        }
+
     def __str__(self):
         return self.email

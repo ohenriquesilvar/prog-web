@@ -6,8 +6,10 @@ import RecentBets from '@/components/RecentBets'
 import { recentBets } from '@/utils/recentBets'
 import RecentResults from '@/components/Results'
 import { results } from '@/utils/results'
+import { AuthService } from '@/services/AuthService'
 
-export default function Home() {
+
+export default async function Home() {
 	return (
 		<Box
 			sx={{

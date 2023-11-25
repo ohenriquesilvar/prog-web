@@ -18,16 +18,21 @@ def register(request):
         email = body['email']
         password = body['password']
         password_confirmation = body['password_confirmation']
-        if password != password_confirmation:
-            return JsonResponse({'message': 'As senhas não conferem'}, status=400)
-        else:
-            user = User.objects.create_user(
-                cpf=cpf,
-                name=name,
-                email=email,
-                password=password
-            )
-            return JsonResponse({'message': 'Usuário criado com sucesso'}, status=201)
+    
+        if User.objects.filter(cpf=cpf).exists():
+            return JsonResponse({'message': 'CPF já cadastrado', 'field' : 'cpf'}, status=400)
+        elif User.objects.filter(email=email).exists():
+            return JsonResponse({'message': 'Email já cadastrado', 'field' : 'email'}, status=400)
+        
+        user = User.objects.create_user(
+            cpf=cpf,
+            name=name,
+            email=email,
+            password=password
+        )
+        if user is None:
+            return JsonResponse({'message': 'Erro inesperado no cadastro'}, status=400)
+        return JsonResponse({'message': 'Usuário criado com sucesso'}, status=201)
     else:
         return JsonResponse({'message': 'Método não permitido'}, status=405)
 

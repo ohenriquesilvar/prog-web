@@ -1,5 +1,6 @@
 import axios from "axios";
 const baseUrl = "http://127.0.0.1:8000";
+
 export class AuthService {
 	private static COOKIE_PASS = 'd6fcc1345196f834dbcf5d8dca89cd5b27fb9cb9e454b99fdfbb25f35e64e223'
 	private static USER_KEY = 'user'
@@ -40,11 +41,23 @@ export class AuthService {
 		const userString = localStorage.getItem(AuthService.USER_KEY)
 		return userString ? JSON.parse(userString) : null
 	}
-}
 
-interface User {
+	static register(user: User): Promise<boolean> {
+		return axios.post(`${baseUrl}/register`, JSON.stringify(user))
+			.then(res => {
+				if (res.data.status === 'error') {
+					return false
+				}
+				return true
+			}).catch(err => {
+				return Promise.reject({field: err.response.data.field, message: err.response.data.message})
+			})
+	}
+}
+export interface User {
 	cpf: string
 	name?: string
 	email?: string
 	password?: string
+	password_confirmation?: string
 }

@@ -1,16 +1,16 @@
-import axios from "axios";
-const baseUrl = "http://127.0.0.1:8000";
+import axios from 'axios'
+const baseUrl = 'http://127.0.0.1:8000'
 
 export class AuthService {
-	private static COOKIE_PASS = 'd6fcc1345196f834dbcf5d8dca89cd5b27fb9cb9e454b99fdfbb25f35e64e223'
+	private static COOKIE_PASS =
+		'd6fcc1345196f834dbcf5d8dca89cd5b27fb9cb9e454b99fdfbb25f35e64e223'
 	private static USER_KEY = 'user'
 
 	private static parseUser(user: any): User {
 		return {
-			cpf : user['cpf'],
+			cpf: user['cpf'],
 			name: user['name'],
 			email: user['email'],
-			password: user['password']
 		}
 	}
 
@@ -20,12 +20,20 @@ export class AuthService {
 		if (res.data.status === 'error') {
 			return false
 		}
-		this.setUser(AuthService.parseUser(res.data['user']))
+		this.setUser(AuthService.parseUser(res.data['user']), res.data['admin'])
 		return true
 	}
 
-	static setUser(user: User): void {
-		localStorage.setItem(AuthService.USER_KEY, JSON.stringify(user))
+	static setUser(user: User, admin?: boolean): void {
+		localStorage.setItem(
+			AuthService.USER_KEY,
+			JSON.stringify({
+				cpf: user.cpf,
+				name: user.name,
+				email: user.email,
+				admin: admin,
+			})
+		)
 	}
 
 	static logout(): void {
@@ -43,14 +51,19 @@ export class AuthService {
 	}
 
 	static register(user: User): Promise<boolean> {
-		return axios.post(`${baseUrl}/register`, JSON.stringify(user))
-			.then(res => {
+		return axios
+			.post(`${baseUrl}/register`, JSON.stringify(user))
+			.then((res) => {
 				if (res.data.status === 'error') {
 					return false
 				}
 				return true
-			}).catch(err => {
-				return Promise.reject({field: err.response.data.field, message: err.response.data.message})
+			})
+			.catch((err) => {
+				return Promise.reject({
+					field: err.response.data.field,
+					message: err.response.data.message,
+				})
 			})
 	}
 }

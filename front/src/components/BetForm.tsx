@@ -1,22 +1,29 @@
 'use client'
-import React, { useState, ChangeEvent } from 'react'
+import React, { useState, ChangeEvent, useEffect } from 'react'
 import TextField from '@mui/material/TextField'
 import MenuItem from '@mui/material/MenuItem'
 import Select from '@mui/material/Select'
 import InputLabel from '@mui/material/InputLabel'
 import FormControl from '@mui/material/FormControl'
-import { Box, InputAdornment, Menu, Typography } from '@mui/material'
+import { Button, InputAdornment, Typography } from '@mui/material'
 import Image from 'next/image'
 
 import { groups } from '@/utils/groups'
+import { BetService } from '@/services/BetService'
+import { AuthService } from '@/services/AuthService'
 
 interface BetFormProps {}
 
 const BetForm: React.FC<BetFormProps> = () => {
 	const [betValue, setBetValue] = useState<string>('')
 	const [betGroup, setBetGroup] = useState<string>('')
+	const [betRound, setBetRound] = useState<number>()
+	const [roundsList, setRoundsList] = useState<
+		{ label: string; value: number }[]
+	>([])
+	const [cpf, setCpf] = useState<string>('')
 
-	const handleAmountChange = (event: ChangeEvent<HTMLInputElement>) => {
+	const handleAmountChange = (event: any) => {
 		// Remove caracteres não numéricos (exceto ponto e vírgula) e formata como moeda
 		const formattedAmount = event.target.value
 			.replace(/[^\d.,]/g, '')
@@ -29,6 +36,35 @@ const BetForm: React.FC<BetFormProps> = () => {
 	const handleBetGroupChange = (event: any) => {
 		setBetGroup(event.target.value as string)
 	}
+
+	const fetchRounds = async () => {
+		const { rounds } = await BetService.getRounds()
+		setRoundsList(
+			rounds.map((round) => ({ label: round.date, value: round.id }))
+		)
+	}
+
+	const handleSubmit = async () => {
+		const bet = {
+			value: parseFloat(betValue),
+			group: Number(betGroup),
+			round_id: betRound ?? 0,
+			cpf: '12345678910',
+		}
+
+		const res = await BetService.createBet(bet)
+		if (res) {
+			window.location.href = '/'
+		}
+	}
+
+	useEffect(() => {
+		if (!AuthService.isAuthenticated()) {
+			window.location.href = '/login'
+		}
+		setCpf(AuthService.getUser()?.cpf ?? '')
+		fetchRounds()
+	}, [])
 
 	return (
 		<form
@@ -89,6 +125,41 @@ const BetForm: React.FC<BetFormProps> = () => {
 					))}
 				</Select>
 			</FormControl>
+
+			<FormControl
+				variant='outlined'
+				style={{ margin: '8px', width: '100%', textAlign: 'start' }}
+			>
+				<InputLabel id='bet-group-label'>Rodada da aposta</InputLabel>
+				<Select
+					value={betRound}
+					onChange={(e) => setBetRound(e.target.value as number)}
+					label='Rodada da aposta'
+					placeholder='Selecione uma rodada'
+					MenuProps={{
+						style: {
+							maxHeight: '250px',
+							marginTop: '20px',
+						},
+					}}
+				>
+					{roundsList.map((round) => (
+						<MenuItem key={round.value} value={round.value}>
+							Rodada {round.label}
+						</MenuItem>
+					))}
+				</Select>
+			</FormControl>
+
+			<Button
+				variant='contained'
+				color='primary'
+				style={{ margin: '10px' }}
+				disabled={!betValue || !betGroup || !betRound}
+				onClick={() => handleSubmit()}
+			>
+				Confirmar
+			</Button>
 		</form>
 	)
 }

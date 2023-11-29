@@ -14,27 +14,25 @@ import { createTheme, ThemeProvider } from '@mui/material/styles'
 import { AuthService } from '@/services/AuthService'
 
 export default function SignIn() {
-	const  handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault()
 		const data = new FormData(event.currentTarget)
-		console.log({
-			cpf: data.get('cpf'),
-			password: data.get('password'),
-		})
 
 		AuthService.login({
-			cpf: data.get('cpf') as string,
+			cpf: (data.get('cpf') as string).replace(/\D/g, ''),
 			name: '',
 			email: '',
 			password: data.get('password') as string,
-		}).then((res) => {
-			if (res) {
-				window.location.href = '/'
-			}
-		}).catch((err) => {
-			console.log('err:')
-			console.log(err)
 		})
+			.then((res) => {
+				if (res) {
+					window.location.href = '/'
+				}
+			})
+			.catch((err) => {
+				console.log(err)
+				alert('Erro ao logar')
+			})
 	}
 
 	const theme = createTheme({

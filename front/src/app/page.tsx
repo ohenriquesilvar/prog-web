@@ -1,3 +1,5 @@
+'use client'
+
 import { Box, Stack, Typography } from '@mui/material'
 import './global.css'
 import BetForm from '@/components/BetForm'
@@ -8,8 +10,12 @@ import RecentResults from '@/components/Results'
 import { results } from '@/utils/results'
 import { AuthService } from '@/services/AuthService'
 
+export default function Home() {
+	const logout = () => {
+		AuthService.logout()
+		window.location.href = '/login'
+	}
 
-export default async function Home() {
 	return (
 		<Box
 			sx={{
@@ -25,8 +31,19 @@ export default async function Home() {
 					alignItems: 'center',
 					backgroundColor: 'green',
 					marginBottom: '20px',
+					cursor: 'pointer',
 				}}
 			>
+				<Typography
+					onClick={() => logout()}
+					style={{
+						right: '20px',
+						position: 'absolute',
+						color: 'white',
+					}}
+				>
+					Sair
+				</Typography>
 				<Typography variant='h6' color={'white'}>
 					Bet do bicho
 				</Typography>
@@ -49,11 +66,11 @@ export default async function Home() {
 
 				<Stack width={'40%'} spacing={2}>
 					<Card>
-						<RecentBets bets={recentBets} />
+						<RecentBets />
 					</Card>
 
 					<Card>
-						<RecentResults results={results} />
+						<RecentResults />
 					</Card>
 				</Stack>
 			</Box>

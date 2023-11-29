@@ -124,3 +124,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'web.User'
 
 LOGIN_URL = '/login/'
+
+# settings.py
+
+RABBITMQ_HOST = 'localhost'
+RABBITMQ_PORT = 5672
+RABBITMQ_USER = 'guest'
+RABBITMQ_PASSWORD = 'guest'
+RABBITMQ_VIRTUAL_HOST = 'result'
+
+# Define a URL for connecting to RabbitMQ
+RABBITMQ_URL = f"amqp://{RABBITMQ_USER}:{RABBITMQ_PASSWORD}@{RABBITMQ_HOST}:{RABBITMQ_PORT}/{RABBITMQ_VIRTUAL_HOST}"

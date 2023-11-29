@@ -14,6 +14,9 @@ from datetime import datetime
 import pytz
 import json
 
+from .rabbitmq_producer import RabbitMQProducer
+from django.conf import settings
+
 @csrf_exempt
 def register(request):
     if request.method =='POST':
@@ -45,12 +48,9 @@ def register(request):
 @csrf_exempt
 def login(request):
     if request.method == 'POST':
-        print(request.body)
         body = json.loads(request.body)
         cpf = body['cpf']
         password = body['password']
-        print(cpf)
-        print(password)
         user = authenticate(
             cpf=cpf,
             password=password
@@ -68,7 +68,6 @@ def login(request):
 @csrf_exempt
 def createBet(request):
     if request.method == 'POST':
-        print(request.body)
         body = json.loads(request.body)
         cpf = body['cpf']
         round_id = body['round_id']
@@ -151,6 +150,16 @@ def listResults(request):
     else:
         return JsonResponse({'message': 'Método não permitido'}, status=405)
 
+
+def sendResultFromRabbitMQ(request):
+    if request.method == 'GET':
+        consumer = RabbitMQConsumer('result')
+        consumer.start_consuming()
+        consumer.close_connection()
+        return JsonResponse({'message': 'Método não permitido'}, status=405)
+    else:
+        return JsonResponse({'message': 'Método não permitido'}, status=405)        
+
 @csrf_exempt
 def createResult(request):
     if request.method == 'POST':
@@ -166,6 +175,42 @@ def createResult(request):
         if result is None:
             return JsonResponse({'message': 'Erro inesperado no resultado'}, status=400)
         
+
+        message = json.dumps({
+            'round_id': round_id,
+            'group': number
+        })
+
+        winners = Bet.objects.filter(round=round, group=number)
+        winnersList = []
+        for winner in winners:
+            winnersList.append({'email': winner.user.email, 'value': winner.value})
+            
+        round=Round.objects.get(id=round_id)
+        if len(winnersList) == 0:
+            return JsonResponse({'message': 'Nenhum ganhador'}, status=200)
+
+        winnerValue = round.valor / len(winnersList)
+
+        reducedDuplicatedWinners = []
+        for winner in winnersList:
+            if winner not in reducedDuplicatedWinners:
+                reducedDuplicatedWinners.append(winner)
+            else:
+                duplicatedWinner = reducedDuplicatedWinners.index(winner)
+                winner['value'] += winnerValue
+                reducedDuplicatedWinners[duplicatedWinner] = winner
+        winnersList = reducedDuplicatedWinners
+
+        result = { 'winners':winnersList, 'amount': winnerValue}
+        message = json.dumps(winnersList)
+
+
+        producer = RabbitMQProducer()
+        producer.send_message(message, 'result')
+        producer.close_connection()
+        print("Mensagem enviada para o RabbitMQ")
+
         return JsonResponse({'message': 'Resultado criado com sucesso'}, status=201)
     else:
         return JsonResponse({'message': 'Método não permitido'}, status=405)

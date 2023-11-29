@@ -49,7 +49,7 @@ const BetForm: React.FC<BetFormProps> = () => {
 			value: parseFloat(betValue),
 			group: Number(betGroup),
 			round_id: betRound ?? 0,
-			cpf: '12345678910',
+			cpf: cpf,
 		}
 
 		const res = await BetService.createBet(bet)

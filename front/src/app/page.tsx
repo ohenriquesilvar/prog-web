@@ -9,12 +9,20 @@ import { recentBets } from '@/utils/recentBets'
 import RecentResults from '@/components/Results'
 import { results } from '@/utils/results'
 import { AuthService } from '@/services/AuthService'
+import { AdminCard } from '@/components/AdminCard'
+import { use, useEffect, useState } from 'react'
 
 export default function Home() {
+	const [admin, setAdmin] = useState<boolean>()
 	const logout = () => {
 		AuthService.logout()
 		window.location.href = '/login'
 	}
+
+	useEffect(() => {
+		const admin = AuthService.getUser()?.admin ?? false
+		setAdmin(admin)
+	}, [])
 
 	return (
 		<Box
@@ -72,6 +80,12 @@ export default function Home() {
 					<Card>
 						<RecentResults />
 					</Card>
+
+					{admin && (
+						<Card>
+							<AdminCard />
+						</Card>
+					)}
 				</Stack>
 			</Box>
 		</Box>

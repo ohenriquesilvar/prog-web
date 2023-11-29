@@ -65,12 +65,6 @@ def login(request):
     else:
         return JsonResponse({'message': 'Método não permitido'}, status=405)
 
-
-
-def logout(request):
-    auth_logout(request)
-    return HttpResponseRedirect("/login/")
-
 @csrf_exempt
 def createBet(request):
     if request.method == 'POST':
@@ -108,7 +102,7 @@ def listRouds(request):
         rounds = Round.objects.all()
         roundsAfterToday = []
         for round in rounds:
-            if round.date > datetime.now(pytz.utc):
+            if round.date > datetime.now(pytz.utc) and Result.objects.filter(round=round).exists() == False:
                 roundsAfterToday.append({
                     'id': round.id,
                     'date': round.date.strftime("%d/%m/%Y"),                
@@ -157,7 +151,44 @@ def listResults(request):
     else:
         return JsonResponse({'message': 'Método não permitido'}, status=405)
 
+@csrf_exempt
+def createResult(request):
+    if request.method == 'POST':
+        print(request.body)
+        body = json.loads(request.body)
+        round_id = body['round_id']
+        number = body['group']
+        round = Round.objects.get(id=round_id)
+        result = Result.objects.create(
+            round=round,
+            number=number
+        )
+        if result is None:
+            return JsonResponse({'message': 'Erro inesperado no resultado'}, status=400)
+        
+        return JsonResponse({'message': 'Resultado criado com sucesso'}, status=201)
+    else:
+        return JsonResponse({'message': 'Método não permitido'}, status=405)
 
+@csrf_exempt
+def createRound(request):
+    if request.method == 'POST':
+
+        print("createRound")
+        print(request.body)
+        body = json.loads(request.body)
+        date = body['date']
+        round = Round.objects.create(
+            date=date,
+            valor=0
+        )
+
+        if round is None:
+            return JsonResponse({'message': 'Erro inesperado no resultado'}, status=400)
+        
+        return JsonResponse({'message': 'Rodada criada com sucesso'}, status=201)
+    else:
+        return JsonResponse({'message': 'Método não permitido'}, status=405)
 
 
         

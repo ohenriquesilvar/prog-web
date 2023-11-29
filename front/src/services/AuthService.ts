@@ -45,7 +45,12 @@ export class AuthService {
 		return !!user // Retorna true se houver um usuário no LocalStorage
 	}
 
-	static getUser(): User | null {
+	static getUser(): {
+		cpf: string
+		name?: string
+		email?: string
+		admin?: boolean
+	} {
 		const userString = localStorage.getItem(AuthService.USER_KEY)
 		return userString ? JSON.parse(userString) : null
 	}

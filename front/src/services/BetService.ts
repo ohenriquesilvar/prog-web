@@ -92,4 +92,38 @@ export class BetService {
 				})
 			})
 	}
+
+	static createResult(result: { round_id: number; group: number }) {
+		return axios
+			.post(`${baseUrl}/result`, JSON.stringify(result))
+			.then((res) => {
+				if (res.data.status === 'error') {
+					return false
+				}
+				return true
+			})
+			.catch((err) => {
+				return Promise.reject({
+					field: err.response.data.field,
+					message: err.response.data.message,
+				})
+			})
+	}
+
+	static createRound(round: { date: Date }) {
+		return axios
+			.post(`${baseUrl}/round`, JSON.stringify(round))
+			.then((res) => {
+				if (res.data.status === 'error') {
+					return false
+				}
+				return true
+			})
+			.catch((err) => {
+				return Promise.reject({
+					field: err.response.data.field,
+					message: err.response.data.message,
+				})
+			})
+	}
 }

@@ -16,7 +16,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onRegister }) => {
 		email: '',
 		password: '',
 		cpf: '',
-		password_confirmation: ''
+		password_confirmation: '',
 	})
 
 	const [formErrors, setFormErrors] = useState<User>({
@@ -24,41 +24,43 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onRegister }) => {
 		email: '',
 		password: '',
 		cpf: '',
-		password_confirmation: ''
+		password_confirmation: '',
 	})
 
 	const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = event.target
 		setUserData((prevData) => ({
 			...prevData,
-			[name]: value,
+			[name]: name === 'cpf' ? value.replace(/\D/g, '') : value,
 		}))
 	}
 
 	const handleSubmit = (event: FormEvent) => {
 		event.preventDefault()
-		
+
 		if (!validateForm()) return
-		
-		AuthService.register(userData).then((response) => {
-			if (response) {
-				window.location.href = '/login'
-			}
-		}).catch((err) => {
-			setFormErrors((prevData) => ({
-				...prevData,
-				[err.field] : err.message
-			}))
-		})
+
+		AuthService.register(userData)
+			.then((response) => {
+				if (response) {
+					window.location.href = '/login'
+				}
+			})
+			.catch((err) => {
+				setFormErrors((prevData) => ({
+					...prevData,
+					[err.field]: err.message,
+				}))
+			})
 	}
 
-	const validateForm = () : boolean => {
+	const validateForm = (): boolean => {
 		setFormErrors((prevData) => ({
 			name: '',
 			email: '',
 			password: '',
 			cpf: '',
-			password_confirmation: ''
+			password_confirmation: '',
 		}))
 
 		if (!userData.cpf || userData.cpf.length != 11) {
@@ -165,7 +167,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onRegister }) => {
 				fullWidth
 				margin='normal'
 				error={formErrors.password_confirmation !== ''}
-				helperText={formErrors.password_confirmation}	
+				helperText={formErrors.password_confirmation}
 			/>
 			<Button
 				type='submit'
